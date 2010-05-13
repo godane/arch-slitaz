@@ -6,8 +6,8 @@ pkgname=('kernel26' 'kernel26-firmware' 'kernel26-headers') # Build stock -ARCH 
 # pkgname=kernel26-custom       # Build kernel with a different name
 _kernelname=${pkgname#kernel26}
 _basekernel=2.6.33
-pkgver=${_basekernel}.3
-pkgrel=2live
+pkgver=${_basekernel}.4
+pkgrel=1as
 _patchname="patch-${pkgver}-1-ARCH"
 arch=(i686 x86_64)
 license=('GPL2')
@@ -21,7 +21,7 @@ source=(ftp://ftp.kernel.org/pub/linux/kernel/v2.6/linux-$_basekernel.tar.bz2
         # standard config files for mkinitcpio ramdisk
         kernel26.preset)
 md5sums=('c3883760b18d50e8d78819c54d579b00'
-         '83e2e790a1fad1a121a5f3493be08a70'
+         'aee5243cf035e0d8af8c93c6e7d14115'
          'a910e9641a3c470da7f9d49916ee0b97'
          '21b46b8b555bdc97ed21f8f708e4b892'
          '1c73e1e7f1762bfb729107fab4a8d126'
