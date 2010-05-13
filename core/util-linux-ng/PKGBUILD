@@ -1,0 +1,120 @@
+# $Id: PKGBUILD 78106 2010-04-19 10:52:18Z allan $
+# Maintainer: judd <jvinet@zeroflux.org>
+pkgbase=util-linux-ng
+pkgname=('util-linux-ng-blkid' 
+	'util-linux-ng-blkid-dev' 
+	'util-linux-ng-cfdisk' 
+	'util-linux-ng-getopt'
+	'util-linux-ng-partx'
+	'util-linux-ng-sfdisk'
+	'util-linux-ng-uuid'
+	'util-linux-ng-uuid-dev')
+pkgver=2.17.2
+pkgrel=2
+pkgdesc="Miscellaneous system utilities for Linux"
+url="http://userweb.kernel.org/~kzak/util-linux-ng/"
+arch=('i686' 'x86_64')
+groups=('base')
+depends=('bash' 'ncurses>=5.7' 'zlib' 'filesystem')
+replaces=('linux32' 'util-linux')
+conflicts=('linux32' 'util-linux' 'e2fsprogs<1.41.8-2')
+provides=('linux32' 'util-linux')
+license=('GPL2')
+options=('!libtool')
+source=(ftp://ftp.kernel.org/pub/linux/utils/${pkgbase}/v2.17/${pkgbase}-${pkgver}.tar.bz2
+        fsck-static.patch
+	cfdisk.desktop)
+optdepends=('perl: for chkdupexe support')
+install=util-linux-ng.install
+md5sums=('4635725a3eef1c57090bac8ea5e082e6'
+         '499f80605a50d1c7b27894f3319343e8'
+         '05ef21b941e2f1bbd4a527dc4b17e338')
+src=${srcdir}/${pkgbase}-${pkgver}
+_pkg=${srcdir}/_pkg
+
+build() {
+  cd "${srcdir}/${pkgbase}-${pkgver}"
+  # Provide static fsck
+  patch -Np1 -i "${srcdir}/fsck-static.patch" || return 1
+  # hardware clock
+  sed -e 's%etc/adjtime%var/lib/hwclock/adjtime%' -i hwclock/hwclock.c || return 1
+  mkdir -p "${pkgdir}/var/lib/hwclock" || return 1
+  autoreconf || return 1
+  automake || return 1
+  ./configure --enable-arch --enable-write --enable-raw --disable-wall --enable-rdev --enable-partx || return 1
+  make HAVE_SLN=yes ADD_RAW=yes || return 1
+  make HAVE_SLN=yes ADD_RAW=yes DESTDIR="${_pkg}" install || return 1
+  # remove files
+  rm -f "${pkgdir}/bin/kill"
+  rm -f "${pkgdir}/usr/share/man/man1/kill.1"
+  rm -f "${pkgdir}/usr/share/man/man5/nfs.5"
+  rm -f "${pkgdir}/usr/share/info/dir"
+}
+
+package_util-linux-ng-blkid() {
+	depends=('glibc' 'util-linux-ng-uuid')
+	pkgdesc="The blkid utility and libary from Util linux NG."
+	mkdir -p $pkgdir/lib $pkgdir/sbin $pkgdir/usr/lib
+	cp -a $_pkg/sbin/blkid $pkgdir/sbin
+	cp -a $_pkg/lib/libblkid.so* $pkgdir/lib
+	cp -a $_pkg/usr/lib/libblkid.so* $pkgdir/usr/lib
+}
+
+package_util-linux-ng-blkid-dev() {
+	pkgdesc="The blkid devel files from Util linux NG."
+	mkdir -p $pkgdir/usr/lib/pkgconfig $pkgdir/usr/include
+	cp -a $_pkg/usr/lib/libblkid.*a $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/pkgconfig/blkid.pc $pkgdir/usr/lib/pkgconfig
+	cp -a $_pkg/usr/include/blkid $pkgdir/usr/include
+}
+
+package_util-linux-ng-cfdisk() {
+	depends=("glibc" "ncurses")
+	pkgdesc="The cfdisk utility from Util linux NG."
+	mkdir -p $pkgdir/sbin $pkgdir/usr/share/applications
+	cp -a $_pkg/sbin/cfdisk $pkgdir/sbin
+	cp ${srcdir}/cfdisk.desktop $pkgdir/usr/share/applications
+}
+
+package_util-linux-ng-getopt() {
+	depends=('glibc')
+	pkgdesc="The getopt utility from Util linux NG."
+	mkdir -p $pkgdir/usr/bin
+	cp -a $_pkg/usr/bin/getopt $pkgdir/usr/bin
+}
+
+package_util-linux-ng-partx() {
+	depends=('glibc')
+	pkgdesc="The partx utilities from Util linux NG (addpart,delpart,partx)."
+	mkdir -p $pkgdir/usr/sbin
+	for i in addpart delpart partx; do
+		cp -a $_pkg/usr/sbin/$i $pkgdir/usr/sbin
+	done
+}
+
+package_util-linux-ng-sfdisk() {
+	depends=('glibc' 'ncurses')
+	pkgdesc="The sfdisk utility from Util linux NG."
+	mkdir -p $pkgdir/sbin
+	cp -a $_pkg/sbin/sfdisk $pkgdir/sbin
+}
+
+package_util-linux-ng-uuid() {
+	depends=('glibc')
+	pkgdesc="The uuid utility and library from Util linux NG."
+	mkdir -p $pkgdir/lib $pkgdir/usr/lib $pkgdir/usr/bin $pkgdir/usr/sbin
+	cp -a $_pkg/usr/sbin/uuidd $pkgdir/usr/sbin
+	cp -a $_pkg/usr/bin/uuidgen $pkgdir/usr/bin
+	cp -a $_pkg/lib/libuuid.so* $pkgdir/lib
+	cd $pkgdir/usr/lib
+	ln -s /lib/libuuid.so.1.3.0 libuuid.so
+	#cp -a $_pkg/usr/lib/libuuid.so* $pkgdir/usr/lib
+}
+
+package_util-linux-ng-uuid-dev() {
+	pkgdesc="The uuid devel files from Util linux NG."
+	mkdir -p $pkgdir/usr/lib/pkgconfig $pkgdir/usr/include
+	cp -a $_pkg/usr/lib/libuuid.*a $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/pkgconfig/uuid.pc $pkgdir/usr/lib/pkgconfig
+	cp -a $_pkg/usr/include/uuid $pkgdir/usr/include
+}
