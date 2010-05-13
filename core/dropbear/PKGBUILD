@@ -1,6 +1,6 @@
 pkgname=dropbear
 pkgver=0.52
-pkgrel=1
+pkgrel=1as
 pkgdesc="Light SSH client and server."
 arch=("i686" "x86_64")
 url="http://matt.ucc.asn.au/dropbear/dropbear.html"

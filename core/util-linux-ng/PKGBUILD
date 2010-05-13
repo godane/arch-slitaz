@@ -1,7 +1,8 @@
 # $Id: PKGBUILD 78106 2010-04-19 10:52:18Z allan $
 # Maintainer: judd <jvinet@zeroflux.org>
 pkgbase=util-linux-ng
-pkgname=('util-linux-ng-blkid' 
+pkgname=('util-linux-ng'
+	'util-linux-ng-blkid' 
 	'util-linux-ng-blkid-dev' 
 	'util-linux-ng-cfdisk' 
 	'util-linux-ng-getopt'
@@ -10,21 +11,19 @@ pkgname=('util-linux-ng-blkid'
 	'util-linux-ng-uuid'
 	'util-linux-ng-uuid-dev')
 pkgver=2.17.2
-pkgrel=2
+pkgrel=2as
 pkgdesc="Miscellaneous system utilities for Linux"
 url="http://userweb.kernel.org/~kzak/util-linux-ng/"
 arch=('i686' 'x86_64')
 groups=('base')
-depends=('bash' 'ncurses>=5.7' 'zlib' 'filesystem')
-replaces=('linux32' 'util-linux')
-conflicts=('linux32' 'util-linux' 'e2fsprogs<1.41.8-2')
-provides=('linux32' 'util-linux')
+depends=('bash' 'ncurses>=5.7' 'zlib')
+provices=('util-linux-ng' 'util-linux')
+replaces=('util-linux-ng' 'util-linux')
 license=('GPL2')
 options=('!libtool')
 source=(ftp://ftp.kernel.org/pub/linux/utils/${pkgbase}/v2.17/${pkgbase}-${pkgver}.tar.bz2
         fsck-static.patch
 	cfdisk.desktop)
-optdepends=('perl: for chkdupexe support')
 install=util-linux-ng.install
 md5sums=('4635725a3eef1c57090bac8ea5e082e6'
          '499f80605a50d1c7b27894f3319343e8'
@@ -49,6 +48,10 @@ build() {
   rm -f "${pkgdir}/usr/share/man/man1/kill.1"
   rm -f "${pkgdir}/usr/share/man/man5/nfs.5"
   rm -f "${pkgdir}/usr/share/info/dir"
+}
+
+package_util-linux-ng() {
+	mkdir -p $pkgdir/etc
 }
 
 package_util-linux-ng-blkid() {

@@ -4,11 +4,12 @@
 
 pkgname=busybox
 pkgver=1.16.1
-pkgrel=1live
+pkgrel=1as
 pkgdesc="Utilities for rescue and embedded systems"
 arch=("i686" "x86_64")
 url="http://busybox.net"
 license=('GPL')
+depends=("slitaz-base-files" "glibc")
 makedepends=("make" "gcc" "sed" "ncurses")
 options=()
 source=($url/downloads/$pkgname-$pkgver.tar.bz2 \
@@ -65,18 +66,18 @@ build() {
 package() {
   cp -a $srcdir/$pkgname-$pkgver/_install/* $pkgdir
   rm -f $pkgdir/sbin/depmod $pkgdir/usr/bin/ar
-  mkdir -p $pkgdir/etc/rc.d
-  ln -sf /etc/rc.d $pkgdir/etc/init.d
   # Busybox config files
+  mkdir -p $pkgdir/etc
   cp $srcdir/busybox.conf $pkgdir/etc
   chmod 600 $pkgdir/etc/busybox.conf
   cp $srcdir/dnsd.conf $pkgdir/etc
   cp $srcdir/udhcpd.conf $pkgdir/etc
   touch $pkgdir/etc/resolv.conf
   cp $srcdir/inetd.conf $pkgdir/etc
-  cp $srcdir/daemon $pkgdir/etc/rc.d
+  mkdir -p $pkgdir/etc/init.d
+  cp $srcdir/daemon $pkgdir/etc/init.d
   for i in dnsd inetd udhcpd zcip crond ; do
-      ln -s $i $pkgdir/etc/rc.d/$i
+      ln -s $i $pkgdir/etc/init.d/$i
   done
   rm $pkgdir/linuxrc
   mkdir -p $pkgdir/etc/modprobe.d
