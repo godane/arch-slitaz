@@ -1,0 +1,7 @@
+# Post message when installing.
+post_install()
+{
+	echo -e "\nTo starts $pkgname server you can run :\n"
+	echo "/etc/rc.d/$pkgname start"
+	echo -e "Or add $pkgname to DAEMONS in /etc/rc.conf\n"
+}
