@@ -1,0 +1,90 @@
+pkgbase=slitaz-tools
+pkgname=('slitaz-tools' 'slitaz-tools-boxes')
+pkgver=3.8
+pkgrel=1
+arch=("any")
+url="http://www.slitaz.org/"
+license=('GPL')
+source=(http://mirror.slitaz.org/sources/tools/$pkgbase-$pkgver.tar.gz)
+md5sums=('0a8a5da01a7903b1ecce624c4e35f631')
+src=$srcdir/$pkgbase-$pkgver
+
+build() {
+    cd $src
+    make msgfmt
+}
+
+package_slitaz-tools() {
+	pkgdesc="SliTaz tools provide installer and utils usable on termnial."
+	backup=(etc/TZ 
+	etc/motd 
+	etc/keymap.conf 
+	etc/X11/screen.conf 
+	etc/locale.conf 
+	etc/firewall.conf 
+	etc/slitaz/applications.conf)
+	depends=(slitaz-boot-scripts dialog)
+	mkdir -p $pkgdir/{sbin,usr/bin,usr/sbin,etc/X11,var/spool/cron/crontabs,usr/share/doc/slitaz-tools,usr/share/slitaz-tools/installer}
+	cp -a $src/rootfs/* $fs
+	if [ -d $pkgdir/etc/init.d ]; then
+		chmod +x $pkgdir/etc/init.d/*
+		mv $pkgdir/etc/init.d $pkgdir/etc/rc.d
+	fi
+	# Tinyutils
+	cp -a $src/tinyutils/tazlocale $pkgdir/sbin
+	touch $pkgdir/etc/locale.conf
+	touch $pkgdir/etc/motd
+	cp -a $src/tinyutils/tazkeymap $pkgdir/sbin
+	touch $pkgdir/etc/keymap.conf
+	touch $pkgdir/etc/TZ
+	cp -a $src/tinyutils/gztazmod.sh $pkgdir/sbin
+	cp -a $src/tinyutils/tazx $pkgdir/usr/bin
+	touch $pkgdir/etc/X11/screen.conf
+	cp -a $src/tinyutils/tazhw $pkgdir/sbin
+	cp -a $src/tinyutils/hwsetup $pkgdir/sbin
+	for app in startx history tazdialog editor browser terminal file-manager
+	do
+		cp -a $src/tinyutils/$app $pkgdir/usr/bin
+	done
+	# Sound config
+	cp -a $src/tinyutils/soundconf $pkgdir/usr/sbin
+	cp -a $src/tinyutils/setmixer $pkgdir/usr/sbin
+	
+	# Installer's
+	cp -a $src/installer/slitaz-installer $pkgdir/usr/bin
+	mkdir -p $pkgdir/usr/share/slitaz/messages/en
+	cp -a $src/messages/en/installer.msg $pkgdir/usr/share/slitaz/messages/en
+	rm -R $pkgdir/usr/share/applications
+
+	chmod -R 755 $pkgdir/usr/bin
+	chmod -R 755 $pkgdir/sbin
+}
+
+package_slitaz-tools-boxes() {
+	pkgdesc="All SliTaz GTKdialog boxes to command line tools."
+	depends=(slitaz-boot-scripts gtkdialog gettext)
+	backup=(etc/wireless)
+	mkdir -p $pkgdir/{etc/wireless,usr/bin,usr/sbin,usr/lib/slitaz,usr/share/locale,usr/share/slitaz/messages/en,usr/share/doc/slitaz-tools}
+	# Desktop files, icons and doc
+	cp -a $src/rootfs/usr/share/applications $pkgdir/usr/share
+	cp -a $src/rootfs/usr/share/pixmaps $pkgdir/usr/share
+	cp -a $src/doc/*.html $pkgdir/usr/share/doc/slitaz-tools
+	for app in bootfloppybox burnbox mountbox netbox serverbox wifibox scpbox subox desktopbox sshbox
+	do
+		cp -a $src/tinyutils/$app $pkgdir/usr/bin
+	done
+	cp -a $src/tinyutils/tazctrlbox $pkgdir/usr/sbin
+	# libs.
+	cp -a $src/lib/[a-z]* $pkgdir/usr/lib/slitaz
+	# Default English messages (will move to po)
+	cp -a $src/messages/en/desktopbox.msg $pkgdir/usr/share/slitaz/messages/en
+	# i18n
+	for l in $(ls $src/po/mo)
+	do
+		mkdir -p $pkgdir/usr/share/locale/$l/LC_MESSAGES
+		cp -a $src/po/mo/$l/* $pkgdir/usr/share/locale/$l/LC_MESSAGES
+	done
+	# Gksu fake for pcmanfm.
+	ln -s subox $pkgdir/usr/bin/gksu
+	chmod -R 755 $pkgdir/usr/bin
+}

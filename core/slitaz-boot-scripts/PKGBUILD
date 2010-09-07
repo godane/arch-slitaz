@@ -1,0 +1,30 @@
+pkgname=slitaz-boot-scripts
+pkgver=3.4
+pkgrel=1
+pkgdesc="Provide all the initialisation scripts used at boot time."
+arch=("any")
+url="http://www.slitaz.org/"
+license=('GPL')
+install=$pkgname.install
+source=(http://mirror.slitaz.org/sources/boot-scripts/$pkgname-$pkgver.tar.gz)
+md5sums=('c137e0db1c419007f1cc4cc7975cd963')
+backup=(etc/inittab 
+	etc/init.d/local.sh 
+	etc/rcS.conf 
+	etc/network.conf)
+src=$srcdir/$pkgname-$pkgver
+
+build() {
+	:
+}
+
+package() {
+	mkdir -p $pkgdir/usr/share $pkgdir/bin $pkgdir/etc/X11
+	cp -a $src/etc $pkgdir
+	cp $src/bootlog $pkgdir/bin
+	cp -a $src/applications $pkgdir/usr/share
+
+	# Perms
+	chmod 755 $pkgdir/etc/init.d/*.sh
+	chmod 755 $pkgdir/etc/init.d/rc*
+}

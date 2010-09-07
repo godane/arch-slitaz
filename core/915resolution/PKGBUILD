@@ -1,0 +1,40 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=915resolution
+pkgver=0.5.3
+pkgrel=1
+pkgdesc="Widescreen support; modify video BIOS of the 800 and 900 series Intel graphics chipsets"
+arch=(i686 x86_64)
+url="http://915resolution.mango-lang.org/"
+license=('GPL')
+depends=()
+source=(http://915resolution.mango-lang.org/$pkgname-$pkgver.tar.gz
+		$pkgname-$pkgver-widescreen-resolution.patch)
+md5sums=('ed287778a53d02c31a7a6a52bc146291'
+         'cbd6f44c425a93f915186d2f831ee14d')
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+build() {
+	cd $src
+	for i in $pkgname-$pkgver-widescreen-resolution.patch ; do
+		[ -f done.$i ] && continue
+		patch -p0 < $srcdir/$i
+		touch done.$i
+	done
+	make clean && make	
+}
+
+package() {
+	mkdir -p $fs/usr/bin
+	cp -a $src/$pkgname $fs/usr/bin
+	cp -a $src/dump_bios $fs/usr/bin
+}
+
+# vim:set ts=2 sw=2 et:

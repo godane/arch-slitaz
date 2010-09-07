@@ -1,0 +1,20 @@
+pkgname=slitaz-menus
+pkgver=1.7
+pkgrel=1
+pkgdesc="SliTaz i18n Freedesktop menus."
+arch=("any")
+url="http://www.slitaz.org/"
+license=('GPL')
+source=($pkgname-$pkgver.tar.gz)
+md5sums=('fd300e640593c65d215572d4ff995a90')
+src=$srcdir/$pkgname-$pkgver
+
+build() {
+	:
+}
+
+package() {
+	mkdir -p $fs/usr/share $pkgdir/etc/xdg
+	cp -a $src/desktop-directories $pkgdir/usr/share
+	cp -a $src/menus $pkgdir/etc/xdg
+}

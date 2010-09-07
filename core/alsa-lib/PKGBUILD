@@ -1,0 +1,54 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgbase=alsa-lib
+pkgname=('alsa-lib' 'alsa-lib-dev')
+pkgver=1.0.23
+pkgrel=1
+pkgdesc="Alsa sound libraries."
+arch=(i686 x86_64)
+url="http://www.alsa-project.org/"
+license=('GPL')
+depends=()
+source=(ftp://ftp.alsa-project.org/pub/lib/$pkgname-$pkgver.tar.bz2)
+md5sums=('f48b50421d8a69d2d806d9c47e534f0d')
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+build() {
+	cd $src
+	./configure \
+		--prefix=/usr \
+		--disable-python 
+	make
+	make DESTDIR=${_pkg} install
+}
+
+package_alsa-lib() {
+	mkdir -p $pkgdir/usr/lib $pkgdir/usr/share
+	cp -a $_pkg/usr/bin $pkgdir/usr
+	cp -a $_pkg/usr/lib/*.so* $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/alsa-lib $pkgdir/usr/lib
+	cp -a $_pkg/usr/share/alsa $pkgdir/usr/share
+	rm $pkgdir/usr/lib/alsa-lib/smixer/*.*a
+}
+
+package_alsa-lib-dev() {
+	pkgdesc="Alsa sound libraries devel files."
+	depends=(alsa-lib)
+	mkdir -p $pkgdir/usr/lib $pkgdir/usr/share
+	cp -a $_pkg/usr/include $pkgdir/usr
+	cp -a $_pkg/usr/lib/*.*a $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/pkgconfig $pkgdir/usr/lib
+	cp -a $_pkg/usr/share/aclocal $pkgdir/usr/share
+	# Copy all and then remove shared libs.
+	cp -a $_pkg/usr/lib/alsa-lib $pgkdir/usr/lib
+	rm $pkgdir/usr/lib/alsa-lib/smixer/*.so*
+}
+
+# vim:set ts=2 sw=2 et:

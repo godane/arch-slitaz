@@ -2,24 +2,29 @@
 # Maintainer: Ronald van Haren <ronald.archlinux.org> 
 # Contributor: judd <jvinet@zeroflux.org>
 pkgbase=e2fsprogs
-pkgname=('e2fsprogs' 'e2fsprogs-dev')
-pkgver=1.41.11
+pkgname=('e2fsprogs' 'e2fsprogs-dev' 'libcomerr' 'libcomerr-dev')
+pkgver=1.41.12
 pkgrel=1
 pkgdesc="Ext2/3/4 filesystem utilities"
 arch=('i686' 'x86_64')
 license=('GPL' 'LGPL' 'MIT')
 url="http://e2fsprogs.sourceforge.net"
 groups=('base')
-depends=('sh' 'util-linux-ng-blkid>=2.16' 'util-linux-ng-uuid>=2.16')
-makedepends=('bc' 'util-linux-ng-blkid-dev>=2.16' 'util-linux-ng-uuid-dev>=2.16')
+depends=('sh' "libcomerr=${pkgver}" 'util-linux-ng-blkid>=2.16' 'util-linux-ng-uuid>=2.16')
+makedepends=('bc' "libcomerr-dev=${pkgver}" 'util-linux-ng-blkid-dev>=2.16' 'util-linux-ng-uuid-dev>=2.16')
 source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz"
-        'MIT-LICENSE')
+        'MIT-LICENSE'
+        'libcomerr.files-list'
+        'libcomerr-dev.files-list')
 backup=('etc/mke2fs.conf')
 install=${pkgname}.install
-md5sums=('fb507a40c2706bc38306f150d069e345'
-         '035b7c69b7a2cecf996a4708c262245e')
+md5sums=('1b24a21fc0c2381ef420961cbfec733f'
+         '035b7c69b7a2cecf996a4708c262245e'
+         '5c3e666abb3de22c79da08301e28cdb7'
+         '9fcc26e1d561142d3f5806d37b41511d')
 src=${srcdir}/${pkgbase}-${pkgver}
 _pkg=${srcdir}/_pkg
+fs=${pkgdir}
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -50,6 +55,9 @@ package_e2fsprogs() {
 	cp -a $_pkg/usr/bin $pkgdir/usr
 	cp -a $_pkg/usr/sbin $pkgdir/usr
 	cp -ad $_pkg/usr/lib/*.so $pkgdir/usr/lib
+	cat $srcdir/*.files-list | while read file; do
+		rm -f $pkgdir$file
+	done
 }
 
 package_e2fsprogs-dev() {
@@ -57,4 +65,20 @@ package_e2fsprogs-dev() {
 	cp -a $_pkg/usr/lib/*.*a $pkgdir/usr/lib
 	cp -a $_pkg/usr/lib/pkgconfig $pkgdir/usr/lib
 	cp -a $_pkg/usr/include $pkgdir/usr
+}
+
+package_libcomerr() {
+	while read file; do
+		dir=$(dirname $file)
+		[ -d $pkgdir$dir ] || mkdir -p $pkgdir$dir
+		cp -a $_pkg$file $pkgdir$file
+	done < $srcdir/$pkgname.files-list
+}
+
+package_libcomerr-dev() {
+	while read file; do
+		dir=$(dirname $file)
+		[ -d $pkgdir$dir ] || mkdir -p $pkgdir$dir
+		cp -a $_pkg$file $pkgdir$file
+	done < $srcdir/$pkgname.files-list
 }

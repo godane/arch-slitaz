@@ -1,0 +1,85 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgbase=alsaplayer
+pkgname=('alsaplayer' 'alsaplayer-dev' 'alsaplayer-scopes')
+pkgver=0.99.80
+pkgrel=1
+pkgdesc="Alsa GTK+ PCM player."
+arch=(i686 x86_64)
+url="http://www.alsaplayer.org/"
+license=('GPL')
+depends="gtk+ alsa-lib libmad libogg libvorbis xorg-libXdamage"
+makedepends="gtk+-dev alsa-lib-dev libmad-dev libogg-dev libvorbis-dev"
+source=(http://www.alsaplayer.org/$pkgname-$pkgver.tar.gz
+		alsaplayer.desktop
+		alsaplayer.png
+		gcc44.patch)
+md5sums=('14bcd05d89d39f89fb539d74ccf36b18'
+         '71dc602aacbc374cafbdae3be9577d05'
+         'c59d4f03ec2085d3c30c6a60942d49fe'
+         'f678d4ae73e485d899cb5758b1f3d3a4')
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+# Rules to configure and make the package.
+build()
+{
+	cd $src
+	patch -p0 < $srcdir/gcc44.patch || exit 1
+	./configure \
+		--enable-nls \
+		--prefix=/usr \
+		--infodir=/usr/share/info \
+		--mandir=/usr/share/man \
+		--enable-gtk2 \
+		--disable-flac \
+		--disable-jack \
+		--disable-esd \
+	make
+	# Chmod install-sh to avoid install error.
+	chmod 755 install-sh &&
+	make DESTDIR=${_pkg} install
+}
+
+package_alsaplayer()
+{
+	mkdir -p $pkgdir/usr/lib
+
+	cp -a $_pkg/usr/bin $pkgdir/usr
+	cp -a $_pkg/usr/lib/*.so* $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/alsaplayer $pkgdir/usr/lib
+
+	# Remove devel files and scopes.
+	rm $pkgdir/usr/lib/alsaplayer/*/*.*a
+	rm -rf $pkgdir/usr/lib/alsaplayer/scopes2
+}
+
+package_alsaplayer-dev() {
+	pkgdesc="Alsa GTK+ PCM player devel files."
+	mkdir -p $pkgdir/usr/lib
+	cp -a $_pkg/usr/include $pkgdir/usr
+	cp -a $_pkg/usr/lib/*.*a $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/pkgconfig $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/alsaplayer $pkgdir/usr/lib
+	
+	# Remove shared libs.
+	rm $pkgdir/usr/lib/alsaplayer/*/*.so
+}
+
+package_alsaplayer-scopes() {
+	pkgdesc="Alsa GTK+ PCM player scopes."
+	depends="expat gtk+ xorg-libX11 xorg-libXau xorg-libXcomposite xorg-libXcursor \
+xorg-libXdmcp xorg-libXext xorg-libXfixes xorg-libXinerama xorg-libXrandr \
+xorg-libXrender libgl xorg-libXdamage xorg-libXxf86vm libdrm"
+	mkdir -p $fs/usr/lib/alsaplayer
+	cp -a $_pkg/usr/lib/alsaplayer/scopes2 \
+		$fs/usr/lib/alsaplayer
+}
+
+# vim:set ts=2 sw=2 et:

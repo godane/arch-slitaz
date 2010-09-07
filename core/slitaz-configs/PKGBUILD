@@ -1,0 +1,30 @@
+pkgname=slitaz-configs
+pkgver=3.2.1
+pkgrel=1
+pkgdesc="SliTaz config files, wallpaper and login sound."
+arch=("any")
+url="http://www.slitaz.org/"
+license=('GPL')
+depends=(lxtask lxpanel lxappearance ttf-dejavu pcmanfm openbox obconf \
+	 slitaz-tools slitaz-tools-boxes slitaz-menus)
+source=(http://mirror.slitaz.org/sources/configs/$pkgname-$pkgver.tar.gz)
+md5sums=('8e9d5636fa9414b8e91d14c5371a4953')
+fs=$pkgdir
+src=$srcdir/$pkgname-$pkgver
+
+build() {
+
+	# Copy rootfs files from the stuff and set permissions.
+	mkdir -p $fs/etc/xdg/openbox
+	cp -a $src/rootfs/etc/xdg/openbox/menu.en.xml $fs/etc/xdg/openbox
+	cp -a $src/rootfs/etc/xdg/openbox/menu.xml $fs/etc/xdg/openbox
+	cp -a $src/rootfs/etc/xdg/openbox/autostart.sh $fs/etc/xdg/openbox
+	cp -a $src/rootfs/etc/xdg/openbox/rc.xml $fs/etc/xdg/openbox
+	cp -a $src/rootfs/etc/skel $fs/etc
+	cp -a $src/rootfs/etc/X11 $fs/etc
+	mkdir $fs/etc/skel/Music $fs/etc/skel/Documents
+	cp -a $src/rootfs/usr $fs
+	cp -a $src/rootfs/root $fs
+	chown -R root.root $fs
+	chmod 0750 $fs/root
+}

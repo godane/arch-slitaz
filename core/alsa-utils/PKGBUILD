@@ -1,0 +1,53 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=alsa-utils
+pkgver=1.0.23
+pkgrel=1
+pkgdesc="Alsa sound system utilities et config tools."
+arch=(i686 x86_64)
+url="http://www.alsa-project.org/"
+license=('GPL')
+depends=(alsa-lib ncurses util-linux-ng-getopt)
+makedepends=(alsa-lib alsa-lib-dev)
+source=(ftp://ftp.alsa-project.org/pub/lib/$pkgname-$pkgver.tar.bz2
+		alsamixer.desktop)
+md5sums=('cb0cf46029ac9549cf3a31bff6a4f4e1'
+         'c9b1393f38fce3b623bbcb22ab2d86ff')
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+build() {
+	cd $src
+	./configure \
+		--prefix=/usr \
+		--infodir=/usr/share/info \
+		--mandir=/usr/share/man \
+		--disable-xmlto 
+	make
+	make DESTDIR=${_pkg} install
+}
+
+# Rules to gen a SliTaz package suitable for Tazpkg.
+package()
+{
+	mkdir -p $fs/usr $fs/etc
+	cp -a $_pkg/usr/bin $fs/usr
+	cp -a $_pkg/usr/sbin $fs/usr
+	touch $fs/etc/asound.state
+	chmod 755 $fs/usr/sbin/*
+	# Remove speaker-test (18 Ko and needs sounds)
+	rm $fs/usr/bin/speaker-test
+	# For conf we need /var/tmp
+	mkdir -p $fs/var/tmp
+	chmod 1777 $fs/var/tmp
+	# Remove alsaconf (use soundconf).
+	rm $fs/usr/sbin/alsaconf
+}
+
+# vim:set ts=2 sw=2 et:

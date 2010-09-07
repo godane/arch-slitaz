@@ -1,13 +1,24 @@
-Add stat -m
---- busybox-1.12.0/coreutils/stat.c
-+++ busybox-1.12.0/coreutils/stat.c
-@@ -14,12 +14,14 @@
+Add non standard stat -m support to display file block list
+Useful to patch read-only filesystems such as ISO9660 or fragmentation checking
+--- busybox-1.17.1/include/usage.src.h
++++ busybox-1.17.1/include/usage.src.h
+@@ -3979,6 +3979,7 @@
+      "\n	-f	Display filesystem status" \
+      "\n	-L	Follow links" \
+      "\n	-t	Display info in terse form" \
++     "\n	-m	Display block list" \
+ 	IF_SELINUX( \
+      "\n	-Z	Print security context" \
+ 	) \
+
+--- busybox-1.17.1/coreutils/stat.c
++++ busybox-1.17.1/coreutils/stat.c
+@@ -13,11 +13,13 @@
+  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
   */
- 
  #include "libbb.h"
 +#include <linux/fs.h>
  
- /* vars to control behavior */
  #define OPT_FILESYS     (1 << 0)
  #define OPT_TERSE       (1 << 1)
  #define OPT_DEREFERENCE (1 << 2)
@@ -17,7 +28,7 @@ Add stat -m
  
  #if ENABLE_FEATURE_STAT_FORMAT
  typedef bool (*statfunc_ptr)(const char *, const char *);
-@@ -359,6 +361,26 @@ static void print_it(const char *masterf
+@@ -361,6 +363,26 @@
  
  /* Stat the file system and print what we find.  */
  #if !ENABLE_FEATURE_STAT_FORMAT
@@ -44,7 +55,7 @@ Add stat -m
  #define do_statfs(filename, format) do_statfs(filename)
  #endif
  static bool do_statfs(const char *filename, const char *format)
-@@ -632,13 +654,15 @@ int stat_main(int argc, char **argv)
+@@ -651,7 +673,7 @@
  	statfunc_ptr statfunc = do_stat;
  
  	opt_complementary = "-1"; /* min one arg */
@@ -53,21 +64,13 @@ Add stat -m
  		IF_SELINUX("Z")
  		IF_FEATURE_STAT_FORMAT("c:", &format)
  	);
- 	if (opts & OPT_FILESYS) /* -f */
- 		statfunc = do_statfs;
-+	if (option_mask32 & OPT_MAP) /* -m */
-+		statfunc = do_mapfile;
- #if ENABLE_SELINUX
- 	if (opts & OPT_SELINUX) {
+@@ -662,6 +684,9 @@
  		selinux_or_die();
-
---- busybox-1.12.0/include/usage.h
-+++ busybox-1.12.0/include/usage.h
-@@ -4183,6 +4183,7 @@
- 	) \
-      "\n	-f	Display filesystem status" \
-      "\n	-L	Follow links" \
-+     "\n	-m	Display block list" \
-      "\n	-t	Display info in terse form" \
- 	IF_SELINUX( \
-      "\n	-Z	Print security context" \
+ 	}
+ #endif
++ 	if (opts & OPT_MAP) { /* -m */
++ 		statfunc = do_mapfile;
++	}
+ 	ok = 1;
+ 	argv += optind;
+ 	for (i = 0; argv[i]; ++i)

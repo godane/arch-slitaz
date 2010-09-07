@@ -1,0 +1,69 @@
+# This is an example of a PKGBUILD for splitting packages. Use this as a
+# start to creating your own, and remove these comments. For more information,
+# see 'man PKGBUILD'. NOTE: Please fill out the license field for your package!
+# If it is unknown, then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+# Warning: install new udev then rebuild hal
+pkgname=('udev' 'udev-dev')
+pkgbase=udev
+pkgver=156
+pkgrel=1
+pkgdesc=""
+arch=(i686 x86_64)
+url="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
+license=('GPL')
+groups=("base")
+depends=()
+makedepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source=(http://www.kernel.org/pub/linux/utils/kernel/hotplug/$pkgname-$pkgver.tar.bz2
+		40-alsa.rules
+		45-usb.rules
+		90-permissions.rules
+		92-hal.rules
+		udev.conf)
+noextract=()
+md5sums=() #generate with 'makepkg -g'
+
+build() {
+  cd "$srcdir/$pkgbase-$pkgver"
+  ./configure --prefix=/usr
+  make
+}
+
+package_pkg1() {
+  # options and directives that can be overridden
+  pkgver=
+  pkgrel=
+  pkgdesc=""
+  arch=()
+  license=()
+  groups=()
+  depends=()
+  optdepends=()
+  provides=()
+  conflicts=()
+  replaces=()
+  backup=()
+  options=()
+  install=
+  changelog=
+
+  cd "$srcdir/$pkgbase-$pkgver"
+  make DESTDIR="$pkgdir/" install-pkg1
+}
+
+package_pkg2() {
+  # options and directives overrides
+  pkgdesc=""
+
+  cd "$srcdir/$pkgbase-$pkgver"
+  make DESTDIR="$pkgdir/" install-pkg2
+}

@@ -1,0 +1,53 @@
+pkgname=slitaz-base-files
+pkgver=4.0
+pkgrel=1
+pkgdesc="Linux tree and the necessary files for the base system."
+arch=("any")
+url="http://www.slitaz.org/"
+license=('GPL')
+replaces=(filesystem)
+provides=(filesystem)
+install=$pkgname.install
+source=(http://mirror.slitaz.org/sources/base-files/$pkgname-$pkgver.tar.gz)
+md5sums=('7faa64837b8927492b4fb47f86fcb6cc')
+backup=(etc/adduser.conf
+	etc/passwd
+	etc/fstab
+	etc/issue
+	etc/hosts
+	etc/host.conf
+	etc/hostname
+	etc/group
+	etc/shadow
+	etc/daemons.conf
+	etc/nsswitch.conf
+	etc/networks
+	etc/profile
+	etc/securetty
+	etc/services
+	etc/shells)
+src=$srcdir/$pkgname-$pkgver
+
+build() {
+	:
+}
+
+package() {
+	cd $src
+	mkdir -p $pkgdir/{bin,dev,home,mnt,proc,root,sbin,sys,tmp}
+	mkdir -p $pkgdir/media/{cdrom,flash,usbdisk}
+	mkdir -p $pkgdir/usr/{bin,games,lib,local,sbin,share/doc}
+	mkdir -p $pkgdir/var/{cache,games,lib,lock,log,spool,tmp}
+
+	cp -a $src/rootfs/* $pkgdir
+	chown 1777 $pkgdir/tmp
+	chown 640 $pkgdir/etc/shadow
+	chown 640 $pkgdir/etc/gshadow
+	chown 0750 $pkgdir/root
+
+	# Populate /dev with $pkgdir/sbin/mktazdevs.sh.
+	#$pkgdir/sbin/mktazdev.sh $pkgdir/dev
+
+	# Create /etc/mtab symlink
+	ln -s /proc/mounts $pkgdir/etc/mtab
+}
