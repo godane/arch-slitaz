@@ -1,0 +1,38 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=asunder
+pkgver=2.0
+pkgrel=1
+pkgdesc="GTK light CD ripper."
+arch=(i686 x86_64)
+url="http://littlesvr.ca/asunder/"
+license=('GPL')
+depends=(gtk+ libcddb cdparanoia-III xorg-libXdamage)
+makedepends=(pkg-config alsa-lib-dev libcddb-dev libcddb glib-dev)
+source=(http://littlesvr.ca/asunder/releases/$pkgname-$pkgver.tar.bz2
+		$pkgname.desktop)
+md5sums=('edde25d364c119d012f4286d7adc4dff'
+         'df20cdd1ea8ca03c84f8e161f9d84efe')
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+build() {
+	cd $src
+	./configure \
+		--prefix=/usr
+	make &&
+	make DESTDIR=${_pkg} install	
+}
+
+package() {
+	mkdir -p $fs/usr
+	cp -a $_pkg/usr/bin $fs/usr
+}
+
+# vim:set ts=2 sw=2 et:

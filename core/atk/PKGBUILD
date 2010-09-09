@@ -1,0 +1,45 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=('atk' 'atk-dev')
+pkgver=1.30.0
+pkgrel=1
+pkgdesc="Accessibility toolkit."
+arch=(i686 x86_64)
+url="http://www.gnome.org/"
+license=('GPL')
+depends=(glib)
+makedepends=(cairo-dev glib-dev pango-dev)
+source=(http://ftp.gnome.org/pub/gnome/sources/atk/1.30/$pkgname-$pkgver.tar.bz2)
+md5sums=('548d413775819fef425410739041cac3')
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+build() {
+	cd $src
+	./configure \
+		--prefix=/usr \
+		--mandir=/usr/share/man \
+		--with-html-dir=/usr/share/doc
+	make &&
+	make DESTDIR=$_pkg install
+}
+
+package_atk() {
+	mkdir -p $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/*.so* $pkgdir/usr/lib
+}
+
+package_atk-dev() {
+	mkdir -p $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/*.*a $pkgdir/usr/lib
+	cp -a $_pkg/usr/lib/pkgconfig $pkgdir/usr/lib
+	cp -a $_pkg/usr/include $pkgdir/usr
+}
+
+# vim:set ts=2 sw=2 et:

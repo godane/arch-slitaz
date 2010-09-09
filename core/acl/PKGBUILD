@@ -1,0 +1,77 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgbase=acl
+pkgname=('acl' 'acl-dev')
+pkgver=2.2.49
+pkgrel=1
+pkgdesc="Commands for Manipulating POSIX Access Control Lists."
+arch=(i686 x86_64)
+url="http://savannah.nongnu.org/projects/acl/"
+license=('GPL')
+depends=(glibc-base attr)
+makedepends=(toolchain autoconf automake m4 libtool gettext attr-dev attr)
+source=(http://mirrors.zerg.biz/nongnu/$pkgbase/$pkgbase-$pkgver.src.tar.gz)
+md5sums=('181445894cca986da9ae0099d5ce2d08')
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+build() {
+	cd $src
+
+	# Patch commands are from http://minimalinux.org/forum/viewtopic.php?pid=1446#p1446
+
+	# these sed lines replace the patch "attr.destdir.diff" from the Slackware source files
+	sed -i s%"@bindir@"%"\$\(DESTDIR\)@bindir@"% include/builddefs.in
+	sed -i s%"@sbindir@"%"\$\(DESTDIR\)@sbindir@"% include/builddefs.in
+	sed -i s%"@libdir@@libdirsuffix@"%"\$\(DESTDIR\)@libdir@@libdirsuffix@"% include/builddefs.in
+	sed -i s%"@libexecdir@@libdirsuffix@"%"\$\(DESTDIR\)@libexecdir@@libdirsuffix@"% include/builddefs.in
+	sed -i s%"@includedir@/attr"%"\$\(DESTDIR\)@includedir@/attr"% include/builddefs.in
+	sed -i s%"@mandir@"%"\$\(DESTDIR\)@mandir@"% include/builddefs.in
+	
+	# force docdir conformance to Slack default
+	sed -i s%"@datadir@/doc/@pkg_name@"%"\$\(DESTDIR\)/usr/doc/@pkg_name@-\$\(VERSION\)"% include/builddefs.in
+	sed -i s%"@datadir@/locale"%"\$\(DESTDIR\)@datadir@/locale"% include/builddefs.in
+
+	# Don't need to build man and doc
+	# rm -r -f man
+	# rm -r -f doc
+
+	# Configure is included in Makefile
+	make LOCAL_CONFIGURE_OPTIONS="$CONFIGURE_ARGS" &&
+	make DESTDIR=${_pkg} install install-lib install-dev
+}
+
+package_acl() {
+	mkdir -p $pkgdir/lib
+	cp -a $_pkg/lib/*.so* $pkgdir/lib
+
+	# Symlinks are not created correctly; create manually
+	mkdir -p $pkgdir/usr/lib
+	ln -s /lib/libacl.so $pkgdir/usr/lib/libacl.so
+
+	cp -a $_pkg/usr/bin $pkgdir/usr
+}
+
+package_acl-dev() {
+	pkgdesc="Development files for acl."
+	mkdir -p $pkgdir/usr/lib $pkgdir/usr/include
+	cp -a $_pkg/usr/lib/*.*a $pkgdir/usr/lib
+
+	# Symlinks are not created correctly; create manually
+	mkdir -p $pkgdir/lib
+	ln -s /usr/lib/libacl.a $pkgdir/lib/libacl.a
+	ln -s /usr/lib/libacl.la $pkgdir/lib/libacl.la
+
+	cp -a $src/include/*acl*.h $pkgdir/usr/include
+
+	mkdir -p $pkgdir/usr/include/sys
+	ln -s /usr/include/acl.h $pkgdir/usr/include/sys/acl.h
+}
+
+# vim:set ts=2 sw=2 et:

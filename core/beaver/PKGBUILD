@@ -1,0 +1,44 @@
+# This is an example PKGBUILD file. Use this as a start to creating your own,
+# and remove these comments. For more information, see 'man PKGBUILD'.
+# NOTE: Please fill out the license field for your package! If it is unknown,
+# then please put 'unknown'.
+
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=beaver
+pkgver=0.4.0
+pkgrel=1
+pkgdesc="Simple and very light advanced text editor."
+arch=(i686 x86_64)
+url="http://beaver-editor.sf.net/"
+license=('GPL')
+depends=(gtk+ xorg-libXdamage)
+makedepends=(gtk+-dev xorg-xproto)
+source=(http://switch.dl.sourceforge.net/sourceforge/$pkgname-editor/$pkgname-$pkgver.tar.bz2
+		beaver.conf.default
+		beaver.desktop)
+md5sums=('5b3fc10c5fddeaac98b1d4dbb5536f40'
+         '60f0089526d001eb966e28d67f1df8bc'
+         '6a6be2eb5292caefda1480d08086e81e')
+
+
+src=$srcdir/$pkgname-$pkgver
+_pkg=$srcdir/_pkg
+fs=$pkgdir
+
+build() {
+	cd $src
+	./configure \
+		--prefix=/usr
+	make && make DESTDIR=$_pkg install
+}
+
+package() {
+	mkdir -p $pkgdir/usr/share/beaver 
+	cp -a $_pkg/usr/bin $pkgdir/usr
+	cp -a $_pkg/usr/share/beaver/resource $pkgdir/usr/share/beaver
+	cp -r $_pkg/usr/share/pixmaps $pkgdir/usr/share
+	# Custom default configuration
+	cp -a $srcdir/beaver.conf.default $pkgdir/usr/share/beaver/resource
+}
+
+# vim:set ts=2 sw=2 et:
